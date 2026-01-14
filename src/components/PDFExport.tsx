@@ -153,10 +153,10 @@ export const PDFExport: React.FC = () => {
             const taskText = tasks.join(", ");
             
             // Split text to fit in cell with proper margins
-            const lines = pdf.splitTextToSize(taskText, colWidth - 3);
+            const lines = pdf.splitTextToSize(taskText, colWidth - 3) as string[];
             let lineY = startY + 3; // 3mm top padding
             
-            lines.slice(0, 3).forEach((line) => {
+            lines.slice(0, 3).forEach((line: string) => {
               if (lineY < startY + rowHeight - 1) {
                 pdf.text(line, xPos + 1.5, lineY);
                 lineY += 3;
