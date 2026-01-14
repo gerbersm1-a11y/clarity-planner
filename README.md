@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clarity - Weekly Planner
 
-## Getting Started
+A modern, sleek weekly planning app built with Next.js, React, and Tailwind CSS. Organize your week with drag-and-drop simplicity across 7 days and 5 categories.
 
-First, run the development server:
+## Features
 
+- **Weekly Grid Layout**: Visual 7-day week view with 5 task categories per day
+- **5 Categories**: Work, Personal, Health, Learning, and Leisure
+- **Color-Coded Tasks**: Each category has its own distinct color for quick identification
+- **Quick Add**: Add tasks instantly with the input field in each category row
+- **Delete Tasks**: Remove tasks with a single click
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Dark Mode Support**: Beautiful dark theme support for comfortable night planning
+- **Modern UI**: Clean, minimalist design with smooth animations and transitions
+
+## Categories
+
+- **💼 Work**: Professional tasks and meetings
+- **👤 Personal**: Personal errands and admin tasks
+- **💪 Health**: Fitness, wellness, and nutrition
+- **📚 Learning**: Education, courses, and skill development
+- **🎮 Leisure**: Hobbies, entertainment, and relaxation
+
+## Installation
+
+### Prerequisites
+- Node.js 18+ and npm
+
+### Setup
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
+### Adding Tasks
+1. Locate the category row for your desired task type
+2. Type the task name in the input field
+3. Press Enter or click the "+" button
+4. Your task will appear in the category column
 
-To learn more about Next.js, take a look at the following resources:
+### Deleting Tasks
+- Click the "✕" button on any task card to remove it
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Planning Your Week
+- Each column represents a day of the week
+- Each row within a day represents a category
+- Tasks are color-coded by category for easy scanning
+- Reorganize tasks by adding/removing them as your week evolves
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── page.tsx           # Main home page
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Global styles
+├── components/
+│   ├── WeeklyPlanner.tsx  # Main planner component
+│   ├── TaskColumn.tsx     # Day column component
+│   └── TaskBox.tsx        # Individual task component
+├── context/
+│   └── TaskContext.tsx    # React Context for state management
+└── types/
+    └── index.ts           # TypeScript interfaces
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Technologies Used
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js**: React framework for production
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **React Context**: State management
+- **Next.js App Router**: Modern routing system
+
+## Future Enhancements
+
+- Full drag-and-drop functionality with @dnd-kit
+- Local storage persistence
+- Weekly task templates
+- Task time scheduling
+- Recurring tasks
+- Export/import functionality
+- Collaboration features
+- Mobile app version
+
+## Development
+
+### Available Scripts
+
+```bash
+# Development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run ESLint
+npm run lint
+```
+
+## License
+
+MIT License - Feel free to use this for personal or commercial projects.
+
+## Support
+
+For issues, questions, or suggestions, please create an issue in the repository.
+
+---
+
+**Happy Planning! 📅✨**
