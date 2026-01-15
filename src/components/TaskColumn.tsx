@@ -51,9 +51,12 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({ day, tasks }) => {
     }
   };
 
-  const handleDragStart = (task: Task) => {
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
     globalDraggedTask = task;
     setDraggedTaskId(task.id);
+    // Safari requires dataTransfer to be set
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", task.id);
   };
 
   const handleDragEnd = () => {
@@ -86,7 +89,7 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({ day, tasks }) => {
                 <div 
                   key={task.id} 
                   draggable 
-                  onDragStart={() => handleDragStart(task)} 
+                  onDragStart={(e) => handleDragStart(e, task)} 
                   onDragEnd={handleDragEnd}
                 >
                   <TaskBox task={task} isDragging={draggedTaskId === task.id} />

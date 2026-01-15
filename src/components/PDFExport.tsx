@@ -170,7 +170,22 @@ export const PDFExport: React.FC = () => {
 
       // Save PDF immediately after generation
       const dateStr = now.toISOString().split("T")[0];
-      pdf.save(`Weekly-Planner-${dateStr}.pdf`);
+      
+      // Safari-compatible download method
+      try {
+        pdf.save(`Weekly-Planner-${dateStr}.pdf`);
+      } catch (saveError) {
+        // Fallback for Safari if direct save fails
+        const pdfBlob = pdf.output('blob');
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `Weekly-Planner-${dateStr}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }
 
       button.disabled = false;
       button.textContent = originalText || "Export to PDF";
