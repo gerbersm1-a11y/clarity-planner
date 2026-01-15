@@ -51,12 +51,16 @@ export const TaskGrid: React.FC<TaskGridProps> = ({ days, tasks }) => {
     return tasks.filter((task) => task.category === category && task.day === day);
   };
 
-  const handleDragStart = (task: Task) => {
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
     setDraggedTask(task);
+    // Safari requires dataTransfer to be set
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", task.id);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   };
 
   const handleDrop = (day: string, category: Category) => {
@@ -99,7 +103,7 @@ export const TaskGrid: React.FC<TaskGridProps> = ({ days, tasks }) => {
                   <div
                     key={task.id}
                     draggable
-                    onDragStart={() => handleDragStart(task)}
+                    onDragStart={(e) => handleDragStart(e, task)}
                     className={`${task.color} rounded p-2 text-white text-xs font-medium flex items-start justify-between gap-1 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow`}
                   >
                     <div className="flex-1 break-words">
