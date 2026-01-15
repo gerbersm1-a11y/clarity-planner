@@ -71,7 +71,7 @@ export const PDFExport: React.FC = () => {
         const rowHeight = 12;
         const categoryRowHeight = 6;
 
-        // Header row with days
+          const handleExportPDF = () => {
         let xPos = 10;
         days.forEach((day) => {
           pdf.setTextColor(0, 0, 0);
