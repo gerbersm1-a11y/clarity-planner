@@ -6,187 +6,181 @@ import { jsPDF } from "jspdf";
 export const PDFExport: React.FC = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = () => {
+    const plannerElement = document.getElementById("weekly-planner-grid");
+    if (!plannerElement) {
+      alert("Could not find planner element");
+      return;
+    }
+
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Generating PDF...";
+
     try {
-      const plannerElement = document.getElementById("weekly-planner-grid");
-      if (!plannerElement) {
-        alert("Could not find planner element");
-        return;
-      }
+      // Create a new PDF in landscape mode for better fit
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
 
-      const button = buttonRef.current;
-      if (!button) return;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let yPosition = 10;
 
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Generating PDF...";
+      // Add title
+      pdf.setFontSize(16);
+      pdf.text("Weekly Planner", 10, yPosition);
+      yPosition += 15;
 
-      try {
-        // Create a new PDF in landscape mode for better fit
-        const pdf = new jsPDF({
-          orientation: "landscape",
-          unit: "mm",
-          format: "a4",
+      // Get current date
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday
+      const dateRange = `Week of ${weekStart.toLocaleDateString()}`;
+      
+      pdf.setFontSize(10);
+      pdf.text(dateRange, 10, yPosition);
+      yPosition += 8;
+
+      // Add a line separator
+      pdf.setDrawColor(0);
+      pdf.line(10, yPosition, pageWidth - 10, yPosition);
+      yPosition += 5;
+
+      // Extract task data from the DOM
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const categories = ["Commitments", "Sleep/Self-care", "Key Workouts", "Supporting Workouts", "Key Habits"];
+      
+      const categoryColors: Record<string, [number, number, number]> = {
+        "Commitments": [59, 130, 246],      // blue
+        "Sleep/Self-care": [147, 51, 234],  // purple
+        "Key Workouts": [34, 197, 94],      // green
+        "Supporting Workouts": [234, 179, 8], // yellow
+        "Key Habits": [236, 72, 153],       // pink
+      };
+
+      // Create a compact table
+      pdf.setFontSize(9);
+      const colWidth = (pageWidth - 20) / 7;
+      const rowHeight = 12;
+      const categoryRowHeight = 6;
+
+      // Header row with days
+      let xPos = 10;
+      days.forEach((day) => {
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(day.substring(0, 3), xPos + colWidth / 2, yPosition, { align: "center" });
+        xPos += colWidth;
+      });
+
+      yPosition += rowHeight;
+
+      // Get all tasks from the DOM
+      const taskElements = plannerElement.querySelectorAll('[data-task-id]');
+      const tasksByDay: Record<string, Record<string, string[]>> = {};
+      
+      days.forEach((day) => {
+        tasksByDay[day] = {};
+        categories.forEach((cat) => {
+          tasksByDay[day][cat] = [];
         });
+      });
 
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        let yPosition = 10;
-
-        // Add title
-        pdf.setFontSize(16);
-        pdf.text("Weekly Planner", 10, yPosition);
-        yPosition += 15;
-
-        // Get current date
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday
-        const dateRange = `Week of ${weekStart.toLocaleDateString()}`;
+      // Parse tasks from DOM
+      taskElements.forEach((el) => {
+        const day = el.getAttribute("data-day");
+        const category = el.getAttribute("data-category");
+        const title = el.getAttribute("data-title");
         
-        pdf.setFontSize(10);
-        pdf.text(dateRange, 10, yPosition);
-        yPosition += 8;
+        if (day && category && title && tasksByDay[day]) {
+          if (!tasksByDay[day][category]) {
+            tasksByDay[day][category] = [];
+          }
+          tasksByDay[day][category].push(title);
+        }
+      });
 
-        // Add a line separator
-        pdf.setDrawColor(0);
-        pdf.line(10, yPosition, pageWidth - 10, yPosition);
-        yPosition += 5;
+      // Draw grid with tasks
+      categories.forEach((category) => {
+        if (yPosition > pageHeight - 30) {
+          pdf.addPage();
+          yPosition = 10;
+        }
 
-        // Extract task data from the DOM
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const categories = ["Commitments", "Sleep/Self-care", "Key Workouts", "Supporting Workouts", "Key Habits"];
+        // Category label row
+        const [r, g, b] = categoryColors[category];
+        pdf.setFillColor(r, g, b);
+        pdf.rect(10, yPosition, pageWidth - 20, categoryRowHeight, "F");
         
-        const categoryColors: Record<string, [number, number, number]> = {
-          "Commitments": [59, 130, 246],      // blue
-          "Sleep/Self-care": [147, 51, 234],  // purple
-          "Key Workouts": [34, 197, 94],      // green
-          "Supporting Workouts": [234, 179, 8], // yellow
-          "Key Habits": [236, 72, 153],       // pink
-        };
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(8);
+        pdf.text(category, 10.5, yPosition + categoryRowHeight - 1);
 
-        // Create a compact table
-        pdf.setFontSize(9);
-        const colWidth = (pageWidth - 20) / 7;
-        const rowHeight = 12;
-        const categoryRowHeight = 6;
+        yPosition += categoryRowHeight + 1;
 
-          const handleExportPDF = () => {
-        let xPos = 10;
+        // Tasks for this category across all days
+        xPos = 10;
+        const startY = yPosition;
+        let maxHeight = rowHeight;
+
+        // First pass: draw borders and calculate height needed
         days.forEach((day) => {
-          pdf.setTextColor(0, 0, 0);
-          pdf.setFont("helvetica", "bold");
-          pdf.text(day.substring(0, 3), xPos + colWidth / 2, yPosition, { align: "center" });
+          const tasks = tasksByDay[day][category] || [];
+          const taskText = tasks.join(", ");
+          
+          pdf.setDrawColor(200, 200, 200);
+          pdf.rect(xPos, yPosition, colWidth, rowHeight);
+          
           xPos += colWidth;
         });
 
-        yPosition += rowHeight;
+        // Second pass: add text with proper positioning
+        xPos = 10;
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7);
 
-        // Get all tasks from the DOM
-        const taskElements = plannerElement.querySelectorAll('[data-task-id]');
-        const tasksByDay: Record<string, Record<string, string[]>> = {};
-        
         days.forEach((day) => {
-          tasksByDay[day] = {};
-          categories.forEach((cat) => {
-            tasksByDay[day][cat] = [];
-          });
-        });
-
-        // Parse tasks from DOM
-        taskElements.forEach((el) => {
-          const day = el.getAttribute("data-day");
-          const category = el.getAttribute("data-category");
-          const title = el.getAttribute("data-title");
+          const tasks = tasksByDay[day][category] || [];
+          const taskText = tasks.join(", ");
           
-          if (day && category && title && tasksByDay[day]) {
-            if (!tasksByDay[day][category]) {
-              tasksByDay[day][category] = [];
+          // Split text to fit in cell with proper margins
+          const lines = pdf.splitTextToSize(taskText, colWidth - 3) as string[];
+          let lineY = startY + 3; // 3mm top padding
+          
+          lines.slice(0, 3).forEach((line: string) => {
+            if (lineY < startY + rowHeight - 1) {
+              pdf.text(line, xPos + 1.5, lineY);
+              lineY += 3;
             }
-            tasksByDay[day][category].push(title);
-          }
-        });
-
-        // Draw grid with tasks
-        categories.forEach((category) => {
-          if (yPosition > pageHeight - 30) {
-            pdf.addPage();
-            yPosition = 10;
-          }
-
-          // Category label row
-          const [r, g, b] = categoryColors[category];
-          pdf.setFillColor(r, g, b);
-          pdf.rect(10, yPosition, pageWidth - 20, categoryRowHeight, "F");
+          });
           
-          pdf.setTextColor(255, 255, 255);
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(8);
-          pdf.text(category, 10.5, yPosition + categoryRowHeight - 1);
-
-          yPosition += categoryRowHeight + 1;
-
-          // Tasks for this category across all days
-          xPos = 10;
-          const startY = yPosition;
-          let maxHeight = rowHeight;
-
-          // First pass: draw borders and calculate height needed
-          days.forEach((day) => {
-            const tasks = tasksByDay[day][category] || [];
-            const taskText = tasks.join(", ");
-            
-            pdf.setDrawColor(200, 200, 200);
-            pdf.rect(xPos, yPosition, colWidth, rowHeight);
-            
-            xPos += colWidth;
-          });
-
-          // Second pass: add text with proper positioning
-          xPos = 10;
-          pdf.setTextColor(0, 0, 0);
-          pdf.setFont("helvetica", "normal");
-          pdf.setFontSize(7);
-
-          days.forEach((day) => {
-            const tasks = tasksByDay[day][category] || [];
-            const taskText = tasks.join(", ");
-            
-            // Split text to fit in cell with proper margins
-            const lines = pdf.splitTextToSize(taskText, colWidth - 3) as string[];
-            let lineY = startY + 3; // 3mm top padding
-            
-            lines.slice(0, 3).forEach((line: string) => {
-              if (lineY < startY + rowHeight - 1) {
-                pdf.text(line, xPos + 1.5, lineY);
-                lineY += 3;
-              }
-            });
-            
-            xPos += colWidth;
-          });
-
-          yPosition += rowHeight + 1;
+          xPos += colWidth;
         });
 
-        // Save PDF
-        const dateStr = now.toISOString().split("T")[0];
-        pdf.save(`Weekly-Planner-${dateStr}.pdf`);
+        yPosition += rowHeight + 1;
+      });
 
-        button.disabled = false;
-        button.textContent = originalText || "Export to PDF";
-      } catch (canvasError) {
-        console.error("Error generating PDF:", canvasError);
-        button.disabled = false;
-        button.textContent = originalText || "Export to PDF";
-        alert("Failed to generate PDF. Please try again.");
-      }
+      // Save PDF immediately after generation
+      const dateStr = now.toISOString().split("T")[0];
+      pdf.save(`Weekly-Planner-${dateStr}.pdf`);
+
+      button.disabled = false;
+      button.textContent = originalText || "Export to PDF";
     } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to export PDF. Please try again.");
+      console.error("Error generating PDF:", error);
+      button.disabled = false;
+      button.textContent = originalText || "Export to PDF";
+      alert("Failed to generate PDF. Please try again.");
     }
   };
-
 
   return (
     <button
